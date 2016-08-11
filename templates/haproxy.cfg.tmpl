@@ -1,0 +1,45 @@
+global
+    maxconn 4096
+    log 10.42.24.10:1514 local2
+
+defaults
+    log global
+    timeout connect  5000
+    timeout client  10000
+    timeout server  10000
+
+resolvers dns
+    nameserver rancher 169.254.169.250:53
+    hold valid 1s
+
+listen statistics
+    bind *:8008
+    mode http
+    stats enable
+    stats uri /stats
+
+listen postgres_master
+    bind *:5432
+    mode tcp
+    timeout client  10800s
+    timeout server  10800s
+    balance leastconn
+    option httpchk OPTIONS /master HTTP/1.0
+    http-check expect status 200
+    default-server port 8080
+{{range ls "/self/stack/services/postgres/containers"}}
+    server {{.}} {{.}}:5432 resolvers dns check fastinter 1s
+{{end}}
+
+listen postgres_replica
+    bind *:5433
+    mode tcp
+    timeout client  10800s
+    timeout server  10800s
+    balance leastconn
+    option httpchk OPTIONS /replica HTTP/1.0
+    http-check expect status 200
+    default-server port 8080
+{{range ls "/self/stack/services/postgres/containers"}}
+    server {{.}} {{.}}:5432 resolvers dns check fastinter 1s
+{{end}}
