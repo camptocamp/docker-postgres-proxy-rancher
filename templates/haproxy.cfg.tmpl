@@ -18,7 +18,7 @@ listen statistics
     stats enable
     stats uri /stats
 
-listen postgres_master
+listen postgres_rw
     bind *:5432
     mode tcp
     timeout client  10800s
@@ -31,7 +31,7 @@ listen postgres_master
     server {{.}} {{.}}:5432 resolvers dns check fastinter 1s
 {{end}}
 
-listen postgres_replica
+listen postgres_ro
     bind *:5433
     mode tcp
     timeout client  10800s
