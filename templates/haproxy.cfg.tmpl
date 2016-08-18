@@ -66,8 +66,9 @@ listen postgres_rw
 
     tcp-check comment     sending\ QUERY\ slave\ or\ master?
     tcp-check send        Q         # Query
-    tcp-check send-binary 00000053  # Int32 Lenght of the query + header
+    tcp-check send-binary 00000081  # Int32 Lenght of the query + header
     tcp-check send        SELECT\ CASE\ WHEN\ pg_is_in_recovery()\ THEN\ \'i_am_slave\'\ ELSE\ \'i_am_master\'\ END;
+    tcp-check send        SELECT\ pg_terminate_backend(pg_backend_pid()); # close connection from server, before tcp-check timeout.
     tcp-check send-binary 00        # End Query with a zero-byte.
     tcp-check comment     Query\ sent.\ Waiting\ response.
     tcp-check expect string i_am_master
@@ -124,8 +125,9 @@ listen postgres_ro
 
     tcp-check comment     sending\ QUERY\ slave\ or\ master?
     tcp-check send        Q         # Query
-    tcp-check send-binary 00000053  # Int32 Lenght of the query + header
+    tcp-check send-binary 00000081  # Int32 Lenght of the query + header
     tcp-check send        SELECT\ CASE\ WHEN\ pg_is_in_recovery()\ THEN\ \'i_am_slave\'\ ELSE\ \'i_am_master\'\ END;
+    tcp-check send        SELECT\ pg_terminate_backend(pg_backend_pid()); # close connection from server, before tcp-check timeout.
     tcp-check send-binary 00        # End Query with a zero-byte.
     tcp-check comment     Query\ sent.\ Waiting\ response.
     tcp-check expect string i_am_slave
