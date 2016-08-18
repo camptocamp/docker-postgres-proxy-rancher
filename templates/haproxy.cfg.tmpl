@@ -84,53 +84,7 @@ listen postgres_ro
     timeout client  10800s
     timeout server  10800s
     balance leastconn
+    option pgsql-check user postgres
 {{range ls "/self/stack/services/postgres/containers"}}
     server {{.}} {{.}}:5432 resolvers dns check fastinter 1s
 {{end}}
-
-    option tcp-check
-    tcp-check connect port 5432
-
-    tcp-check comment     sending\ StartUp\ message
-    tcp-check send-binary 00000008 # StartUp Message Length
-    tcp-check send-binary 04d2162f # StartUp Message (protocol version number)
-    tcp-check comment     StartUp\ message\ sent.
-    tcp-check expect binary 4e
-    tcp-check comment     Received\ N\ (OK)
-
-    tcp-check comment     sending\ authentication\ message
-    tcp-check send-binary 0000005d # lenght of msg + headers
-    tcp-check send-binary 00030000 # Int32(196608) to tell I'm a StartupMessage (F)
-    tcp-check send        user
-    tcp-check send-binary 00
-    tcp-check send        postgres
-    tcp-check send-binary 00
-    tcp-check send        database
-    tcp-check send-binary 00
-    tcp-check send        postgres
-    tcp-check send-binary 00
-    tcp-check send        application_name
-    tcp-check send-binary 00
-    tcp-check send        haproxy-check
-    tcp-check send-binary 00
-    tcp-check send        client_encoding
-    tcp-check send-binary 00
-    tcp-check send        UTF8
-    tcp-check send-binary 00
-    tcp-check comment     sending\ last\ authentication\ byte
-    tcp-check send-binary 00
-    tcp-check comment     authentication\ message\ sent.
-    tcp-check expect rstring ^R
-    tcp-check comment     received\ answer\ with\ R\ (OK)
-
-    tcp-check comment     sending\ QUERY\ slave\ or\ master?
-    tcp-check send        Q         # Query
-    tcp-check send-binary 00000081  # Int32 Lenght of the query + header
-    tcp-check send        SELECT\ CASE\ WHEN\ pg_is_in_recovery()\ THEN\ \'i_am_slave\'\ ELSE\ \'i_am_master\'\ END;
-    tcp-check send        SELECT\ pg_terminate_backend(pg_backend_pid()); # close connection from server, before tcp-check timeout.
-    tcp-check send-binary 00        # End Query with a zero-byte.
-    tcp-check comment     Query\ sent.\ Waiting\ response.
-    tcp-check expect string i_am_slave
-    tcp-check comment     received\ string\ i_am_master.\ Sending\ termination\ message
-    tcp-check send        X         # Termination message
-    tcp-check send-binary 00000004  # Int32(4) lenght of Termination message
