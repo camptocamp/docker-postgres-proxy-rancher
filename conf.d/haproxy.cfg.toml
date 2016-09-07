@@ -2,8 +2,7 @@
 src = "haproxy.cfg.tmpl"
 dest = "/usr/local/etc/haproxy/haproxy.cfg"
 keys = [
-  "/self/stack/services/postgres/containers/",
-  "/self/stack/services/postgres/containers/0/name",
+  "/self/stack/services/postgres/containers"
 ]
 check_cmd = "haproxy -c -f {{ .src }}"
 reload_cmd = "pkill -HUP -f haproxy-systemd-wrapper"

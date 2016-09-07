@@ -25,8 +25,8 @@ listen postgres_rw
     timeout client  10800s
     timeout server  10800s
     balance leastconn
-{{if exists "/self/stack/services/postgres/containers/0/name"}}
-    server {{getv "/self/stack/services/postgres/containers/0/name"}} {{getv "/self/stack/services/postgres/containers/0/name"}}:5432 resolvers dns check fastinter 1s
+{{range ls "/self/stack/services/postgres/containers"}}
+    server {{.}} {{.}}:5432 resolvers dns check fastinter 1s
 {{end}}
 
     option tcp-check
@@ -85,8 +85,6 @@ listen postgres_ro
     timeout server  10800s
     balance leastconn
     option pgsql-check user postgres
-{{range $container := lsdir "/self/stack/services/postgres/containers"}}
-  {{if ne $container "0"}}
+{{range ls "/self/stack/services/postgres/containers"}}
     server {{.}} {{.}}:5432 resolvers dns check fastinter 1s
-  {{end}}
 {{end}}
