@@ -40,15 +40,15 @@ listen postgres_rw
     tcp-check comment     Received\ N\ (OK)
 
     tcp-check comment     sending\ authentication\ message
-    tcp-check send-binary 0000005d # lenght of msg + headers
+    tcp-check send-binary 00000063 # lenght of msg + headers
     tcp-check send-binary 00030000 # Int32(196608) to tell I'm a StartupMessage (F)
     tcp-check send        user
     tcp-check send-binary 00
-    tcp-check send        postgres
+    tcp-check send        healthcheck
     tcp-check send-binary 00
     tcp-check send        database
     tcp-check send-binary 00
-    tcp-check send        postgres
+    tcp-check send        healthcheck
     tcp-check send-binary 00
     tcp-check send        application_name
     tcp-check send-binary 00
