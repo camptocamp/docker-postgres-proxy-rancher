@@ -22,8 +22,8 @@ listen postgres_rw
     bind *:5432
     mode tcp
     option tcp-smart-connect
-    timeout client  10800s
-    timeout server  10800s
+    timeout client  2d
+    timeout server  2d
     balance leastconn
 {{range ls "/self/stack/services/postgres/containers"}}
     server {{.}} {{.}}:5432 resolvers dns check fastinter 1s
