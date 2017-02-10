@@ -1,6 +1,7 @@
 FROM haproxy:1.6
 
-ENV CONFD_VERSION=0.12.0-alpha3
+ENV CONFD_VERSION=0.12.0-alpha3 \
+    TIMEOUT=10800s
 
 RUN apt-get update \
   && apt-get install -y curl \
