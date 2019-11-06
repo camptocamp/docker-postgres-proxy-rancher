@@ -32,49 +32,17 @@ listen postgres_rw
     option tcp-check
 
     # https://www.postgresql.org/docs/devel/static/protocol-message-formats.html can help you understand the following
-    tcp-check comment     sending\ StartUp\ message
-    tcp-check send-binary 00000008 # StartUp Message Length
-    tcp-check send-binary 04d2162f # StartUp Message (protocol version number)
-    tcp-check comment     StartUp\ message\ sent.
-    tcp-check expect binary 4e
-    tcp-check comment     Received\ N\ (OK)
-
-    tcp-check comment     sending\ authentication\ message
-    tcp-check send-binary 00000063 # lenght of msg + headers
-    tcp-check send-binary 00030000 # Int32(196608) to tell I'm a StartupMessage (F)
-    tcp-check send        user
-    tcp-check send-binary 00
-    tcp-check send        healthcheck
-    tcp-check send-binary 00
-    tcp-check send        database
-    tcp-check send-binary 00
-    tcp-check send        healthcheck
-    tcp-check send-binary 00
-    tcp-check send        application_name
-    tcp-check send-binary 00
-    tcp-check send        haproxy-check
-    tcp-check send-binary 00
-    tcp-check send        client_encoding
-    tcp-check send-binary 00
-    tcp-check send        UTF8
-    tcp-check send-binary 00
-    tcp-check comment     sending\ last\ authentication\ byte
-    tcp-check send-binary 00
-    tcp-check comment     authentication\ message\ sent.
-    tcp-check expect rstring ^R
-    tcp-check comment     received\ answer\ with\ R\ (OK)
-
-    tcp-check comment     sending\ QUERY\ slave\ or\ master?
-    tcp-check send        Q         # Query
-    tcp-check send-binary 00000081  # Int32 Lenght of the query + header
-    tcp-check send        SELECT\ CASE\ WHEN\ pg_is_in_recovery()\ THEN\ \'i_am_slave\'\ ELSE\ \'i_am_master\'\ END;
-    tcp-check send        SELECT\ pg_terminate_backend(pg_backend_pid()); # close connection from server, before tcp-check timeout.
-    tcp-check send-binary 00        # End Query with a zero-byte.
+    tcp-check send-binary 0000002f000300007573657200686561 # |.../....user.hea|
+    tcp-check send-binary 6c7468636865636b0064617461626173 # |lthcheck.databas|
+    tcp-check send-binary 65006865616c7468636865636b000051 # |e.healthcheck..Q|
+    tcp-check send-binary 0000005353454c454354204341534520 # |...SSELECT CASE |
+    tcp-check send-binary 5748454e2070675f69735f696e5f7265 # |WHEN pg_is_in_re|
+    tcp-check send-binary 636f766572792829205448454e202769 # |covery() THEN 'i|
+    tcp-check send-binary 5f616d5f736c6176652720454c534520 # |_am_slave' ELSE |
+    tcp-check send-binary 27695f616d5f6d61737465722720454e # |'i_am_master' EN|
+    tcp-check send-binary 443b005800000004                 # |D;.X....
     tcp-check comment     Query\ sent.\ Waiting\ response.
     tcp-check expect string i_am_master
-    tcp-check comment     received\ string\ i_am_master.\ Sending\ termination\ message
-    tcp-check send        X         # Termination message
-    tcp-check send-binary 00000004  # Int32(4) lenght of Termination message
 
 
 listen postgres_ro
@@ -91,49 +59,17 @@ listen postgres_ro
     option tcp-check
 
     # https://www.postgresql.org/docs/devel/static/protocol-message-formats.html can help you understand the following
-    tcp-check comment     sending\ StartUp\ message
-    tcp-check send-binary 00000008 # StartUp Message Length
-    tcp-check send-binary 04d2162f # StartUp Message (protocol version number)
-    tcp-check comment     StartUp\ message\ sent.
-    tcp-check expect binary 4e
-    tcp-check comment     Received\ N\ (OK)
-
-    tcp-check comment     sending\ authentication\ message
-    tcp-check send-binary 00000063 # lenght of msg + headers
-    tcp-check send-binary 00030000 # Int32(196608) to tell I'm a StartupMessage (F)
-    tcp-check send        user
-    tcp-check send-binary 00
-    tcp-check send        healthcheck
-    tcp-check send-binary 00
-    tcp-check send        database
-    tcp-check send-binary 00
-    tcp-check send        healthcheck
-    tcp-check send-binary 00
-    tcp-check send        application_name
-    tcp-check send-binary 00
-    tcp-check send        haproxy-check
-    tcp-check send-binary 00
-    tcp-check send        client_encoding
-    tcp-check send-binary 00
-    tcp-check send        UTF8
-    tcp-check send-binary 00
-    tcp-check comment     sending\ last\ authentication\ byte
-    tcp-check send-binary 00
-    tcp-check comment     authentication\ message\ sent.
-    tcp-check expect rstring ^R
-    tcp-check comment     received\ answer\ with\ R\ (OK)
-
-    tcp-check comment     sending\ QUERY\ slave\ or\ master?
-    tcp-check send        Q         # Query
-    tcp-check send-binary 00000081  # Int32 Lenght of the query + header
-    tcp-check send        SELECT\ CASE\ WHEN\ pg_is_in_recovery()\ THEN\ \'i_am_slave\'\ ELSE\ \'i_am_master\'\ END;
-    tcp-check send        SELECT\ pg_terminate_backend(pg_backend_pid()); # close connection from server, before tcp-check timeout.
-    tcp-check send-binary 00        # End Query with a zero-byte.
+    tcp-check send-binary 0000002f000300007573657200686561 # |.../....user.hea|
+    tcp-check send-binary 6c7468636865636b0064617461626173 # |lthcheck.databas|
+    tcp-check send-binary 65006865616c7468636865636b000051 # |e.healthcheck..Q|
+    tcp-check send-binary 0000005353454c454354204341534520 # |...SSELECT CASE |
+    tcp-check send-binary 5748454e2070675f69735f696e5f7265 # |WHEN pg_is_in_re|
+    tcp-check send-binary 636f766572792829205448454e202769 # |covery() THEN 'i|
+    tcp-check send-binary 5f616d5f736c6176652720454c534520 # |_am_slave' ELSE |
+    tcp-check send-binary 27695f616d5f6d61737465722720454e # |'i_am_master' EN|
+    tcp-check send-binary 443b005800000004                 # |D;.X....
     tcp-check comment     Query\ sent.\ Waiting\ response.
     tcp-check expect string i_am_slave
-    tcp-check comment     received\ string\ i_am_slave.\ Sending\ termination\ message
-    tcp-check send        X         # Termination message
-    tcp-check send-binary 00000004  # Int32(4) lenght of Termination message
 {{ else }}
     option pgsql-check user postgres
 {{ end }}
